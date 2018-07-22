@@ -8,10 +8,12 @@ class SRServer {
    {  
       String str = "";
       String responseString = "";
+      String requestString = "";
+      String file = "";
       byte[] byteData;
-      byte[] receiveData = new byte[256]; 
-      byte[] sendData  = new byte[256]; 
-      byte[] headerData = new byte[256];
+      byte[] receiveData = new byte[512]; 
+      byte[] sendData  = new byte[512]; 
+      byte[] headerData = new byte[512];
       int port = 10035;
       
       
@@ -27,17 +29,25 @@ class SRServer {
          
          serverSocket.receive(receivePacket);
          
-
-          
+         //Store request in string
+         requestString = new String(receivePacket.getData());
+         requestString = requestString.trim();
+         String[] requestStringArr = requestString.split("\\s+");
+         file = requestStringArr[1];
+         System.out.println(file);
+         
          //Get IP addr and port # of sender
          InetAddress IPAddress = receivePacket.getAddress(); 
          
          port = receivePacket.getPort(); 
          System.out.println("Connected to host.");
+         
+         //Print requested file
+         System.out.println("File Requested: " + file);
                   
          //read the file, store in string
-         str = readFile();
-	 System.out.println("\n\nText from input file: \n" + str + "\n\n");
+         str = readFile(file);
+         System.out.println("\n\nText from input file: \n" + str + "\n\n");
 
          //Get bytes again to account for header
          byteData = str.getBytes();
@@ -72,7 +82,7 @@ class SRServer {
                }
             }
             
-            //Decalare and fill checksum array
+            //Declare and fill checksum array
             byte[] checksumArray = new byte[4];
             checksumArray = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(checksum).array();
             
@@ -108,11 +118,11 @@ class SRServer {
    
    }
    
-   public static String readFile()
+   public static String readFile(String fileToRead)
    {
       StringBuilder contentBuilder = new StringBuilder();
       try {
-         BufferedReader in = new BufferedReader(new FileReader("TestText.html"));
+         BufferedReader in = new BufferedReader(new FileReader(fileToRead));
          String str1;
          while ((str1 = in.readLine()) != null) {
             contentBuilder.append(str1);
