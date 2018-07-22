@@ -20,12 +20,13 @@ class SRClient {
       InetAddress IPAddress = null;
       
       //Create packets
-      byte[] sendData = new byte[256];
-      byte[] receiveData = new byte[256];
-      byte[] headerData = new byte[256];
+      byte[] sendData = new byte[512];
+      byte[] receiveData = new byte[512];
+      byte[] headerData = new byte[512];
       
       //Assign IP Address
       String IPInput;
+
       Scanner sc = new Scanner(System.in);
       do {
          //User Enters IP
@@ -48,6 +49,12 @@ class SRClient {
          
       } while(true);
       
+      //Enter File Name to be sent
+      String fileInput;  
+      System.out.println("Please enter the file name to be received: ");
+      fileInput = sc.nextLine();
+      fileInput = "GET " + fileInput + " HHTP/1.0";
+    
       //Assign Port Number
       int portNumber;
       System.out.println("Please enter the server port number: ");
@@ -59,11 +66,12 @@ class SRClient {
       sc.close();
       
       //Create datagram - Send a request packet
-      DatagramPacket request = new DatagramPacket(new byte[256], 256, IPAddress, portNumber);
+      byte[] fileToRequest = fileInput.getBytes();
+      DatagramPacket request = new DatagramPacket(fileToRequest, fileToRequest.length, IPAddress, portNumber);
       clientSocket.send(request);
       System.out.println("HTTP request sent to server...");
       
-      //Create a recieving packet
+      //Create a receiving packet
       DatagramPacket headerPacket;
       headerPacket = new DatagramPacket(headerData, headerData.length);
       
@@ -74,11 +82,11 @@ class SRClient {
       receiveData = headerPacket.getData();
       String headerInfo = new String(receiveData);
       
-      receiveData = new byte[256];
+      receiveData = new byte[512];
       
       //Recieve Packet Information
-      byte[] buffer = new byte[256];
-      byte[] dataReceived = new byte[252];
+      byte[] buffer = new byte[512];
+      byte[] dataReceived = new byte[252]; //Subtract checksum and sequence number bytes from header.
       String textReceived = "";
       int packetNumber = 0;
       boolean eof = false;
